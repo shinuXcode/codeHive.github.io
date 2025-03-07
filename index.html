@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CodeHive Sensei</title>
+  <link rel="icon" type="image/webp" href="IMG_20250307_175042_121.webp">
+  <style>
+    /* 
+      FONT IMPORT 
+      (Change if you prefer a different font)
+    */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+    /* GLOBAL RESETS & STYLES */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+      scroll-behavior: smooth;
+    }
+
+    /* ===========================
+       DEFAULT (NIGHT) THEME
+       =========================== */
+    body {
+      /* Subtle dark gradient background */
+      background: linear-gradient(130deg, #0d1117 30%, #090c10 100%);
+      color: #fff;
+      text-align: center;
+      overflow-x: hidden;
+      position: relative;
+    }
+    /* NIGHT BUBBLES (default) */
+    .bubble {
+      position: absolute;
+      bottom: -50px; /* start below the screen */
+      background: radial-gradient(circle, rgba(255,255,255,0.7), transparent);
+      border-radius: 50%;
+      opacity: 0.8;
+    }
+
+    /* BUBBLE CONTAINER (behind everything) */
+    #bubbleContainer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: -1;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      left: 0;
+      padding: 15px 30px;
+      z-index: 999;
+      background: rgba(255, 255, 255, 0.05); /* Slight glass effect */
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      animation: fadeIn 1.5s forwards;
+      opacity: 0;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: 600;
+    }
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .nav-links {
+      display: flex;
+      gap: 30px;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: #fff;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+    .nav-links a:hover {
+      color: #ffea00;
+      text-decoration: none;
+    }
+
+    /* THEME TOGGLE ICON (SUN/MOON) */
+    .theme-toggle {
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    .theme-toggle:hover {
+      transform: scale(1.2);
+    }
+
+    /* HAMBURGER ICON (MOBILE) */
+    .menu-icon {
+      display: none; /* Hidden on desktop */
+      cursor: pointer;
+    }
+    .menu-icon div {
+      width: 28px;
+      height: 3px;
+      background-color: #fff;
+      margin: 6px 0;
+      transition: 0.4s;
+    }
+
+    /* HERO SECTION */
+    .hero {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin-top: 70px; /* space for navbar */
+      padding: 0 20px;
+      animation: fadeIn 2s forwards;
+      opacity: 0;
+    }
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .hero .tagline {
+      font-size: 1.3rem;
+      margin-top: 10px;
+      font-weight: 400;
+      opacity: 0.9;
+    }
+
+    /* SECTIONS */
+    .section {
+      padding: 60px 20px;
+      animation: fadeIn 2s forwards;
+      opacity: 0;
+    }
+    /* GLASS CARD */
+    .glass-box {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 600px;
+      margin: auto;
+      transition: 0.3s;
+    }
+    .glass-box:hover {
+      transform: scale(1.02);
+    }
+    .glass-box a {
+      text-decoration: none;
+      color: #ffea00;
+      transition: color 0.3s;
+    }
+    .glass-box a:hover {
+      color: #fff;
+    }
+
+    /* FOOTER */
+    footer {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 15px;
+      margin-top: 30px;
+      backdrop-filter: blur(10px);
+      animation: fadeIn 2s forwards;
+      opacity: 0;
+    }
+
+    /* ADMIN KEY ICON */
+    .admin-key {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      font-size: 24px;
+      cursor: pointer;
+      opacity: 0.3;
+      transition: opacity 0.3s, transform 0.3s;
+      z-index: 1000;
+    }
+    .admin-key:hover {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+
+    /* ADMIN PANEL */
+    #adminPanel {
+      display: none; /* hidden by default */
+      max-width: 700px;
+      margin: 20px auto;
+    }
+    #adminPanel .glass-box {
+      text-align: left;
+    }
+    #adminPanel label {
+      display: block;
+      margin-top: 10px;
+    }
+    #adminPanel input,
+    #adminPanel textarea {
+      width: 100%;
+      margin-top: 5px;
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    #adminPanel button {
+      margin-top: 15px;
+      background: #fff;
+      color: #007bff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: 0.3s;
+    }
+    #adminPanel button:hover {
+      background: #222;
+      color: #fff;
+    }
+
+    /* RESOURCE SECTION */
+    .resource-section {
+      margin: 20px auto;
+      max-width: 600px;
+    }
+    .resource-section img {
+      width: 100px;
+      height: 100px;
+      margin-bottom: 10px;
+    }
+    .resource-section a {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 10px 20px;
+      background: #ffea00;
+      color: #000;
+      border-radius: 5px;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+    .resource-section a:hover {
+      background: #fff;
+      color: #000;
+    }
+
+    /* MEDIA QUERIES (RESPONSIVE) */
+    @media (max-width: 768px) {
+      .nav-links {
+        position: absolute;
+        top: 70px;
+        right: 0;
+        background: rgba(0,0,0,0.8);
+        backdrop-filter: blur(8px);
+        display: none;  /* hidden by default on mobile */
+        flex-direction: column;
+        width: 200px;
+        text-align: left;
+        padding: 20px;
+        border-bottom-left-radius: 8px;
+      }
+      .nav-links a {
+        margin: 10px 0;
+      }
+      .nav-links.active {
+        display: flex; /* show on toggle */
+      }
+      .menu-icon {
+        display: block; /* show hamburger on mobile */
+      }
+    }
+
+    /* FADE-IN KEYFRAMES */
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* ===========================
+       DAY (LIGHT) THEME
+       =========================== */
+    .light-mode {
+      /* Pastel gradient for day mode */
+      background: linear-gradient(130deg, #f2f8ff 30%, #dce7f3 100%) !important;
+      color: #222 !important;
+    }
+    .light-mode .bubble {
+      /* Softer bubble for day mode */
+      background: radial-gradient(circle, rgba(180,200,255,0.6), transparent) !important;
+    }
+    .light-mode .navbar {
+      background: rgba(255, 255, 255, 0.6) !important;
+      color: #000 !important;
+    }
+    .light-mode .nav-links a {
+      color: #000 !important;
+    }
+    .light-mode .menu-icon div {
+      background-color: #000 !important;
+    }
+    .light-mode footer {
+      background: rgba(255, 255, 255, 0.6) !important;
+      color: #000 !important;
+    }
+    .light-mode .glass-box {
+      background: rgba(255, 255, 255, 0.5) !important;
+      color: #000 !important;
+    }
+    .light-mode .glass-box a {
+      color: #007bff !important;
+    }
+    .light-mode .glass-box a:hover {
+      color: #222 !important;
+    }
+    .light-mode .theme-toggle {
+      color: #000 !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BUBBLE BACKGROUND CONTAINER -->
+  <div id="bubbleContainer"></div>
+
+  <!-- NAVBAR -->
+  <div class="navbar">
+    <div class="logo">CodeHive Sensei</div>
+    <div class="nav-right">
+      <div class="nav-links" id="navLinks">
+        <a href="#contact">Contact</a>
+      </div>
+      <!-- SUN/MOON TOGGLE ICON -->
+      <div class="theme-toggle" id="themeToggle" onclick="toggleDayNight()">☀️</div>
+      <!-- 2-Line Hamburger Icon -->
+      <div class="menu-icon" onclick="toggleMenu()">
+        <div class="bar1"></div>
+        <div class="bar2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HERO SECTION -->
+  <div class="hero">
+    <h1 id="typedText"></h1>
+    <!-- Tagline -->
+    <h2 class="tagline">Your daily dose of coding, AI, and web dev!</h2>
+  </div>
+
+  <!-- DYNAMIC RESOURCES SECTION -->
+  <div id="resourcesContainer"></div>
+
+  <!-- CONTACT SECTION -->
+  <div class="section" id="contact">
+    <div class="glass-box">
+      <h2>📩 Contact Us</h2>
+      <p>
+        <!-- edit here (Put your social media links) -->
+        Follow us on 
+        <a href="#" target="_blank">Instagram</a> |
+        <a href="#" target="_blank">YouTube</a> |
+        <a href="#" target="_blank">Telegram</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    © 2025 CodeHive Sensei | All Rights Reserved
+  </footer>
+
+  <!-- KEY ICON FOR ADMIN LOGIN (BOTTOM-RIGHT) -->
+  <div class="admin-key" onclick="adminLogin()">🔑</div>
+
+  <!-- ADMIN PANEL (Hidden by default) -->
+  <div id="adminPanel">
+    <div class="glass-box">
+      <h2>Admin Panel</h2>
+      <p>Welcome, Admin! Add new PDFs, notes, or cheat sheets here.</p>
+      <form id="resourceForm">
+        <label>Title of Resource:</label>
+        <input type="text" id="resourceTitle" placeholder="e.g. JavaScript Cheat Sheet" required>
+
+        <label>Resource Link / File URL:</label>
+        <input type="text" id="resourceLink" placeholder="e.g. https://example.com/js-cheatsheet.pdf" required>
+
+        <label>Description:</label>
+        <textarea id="resourceDescription" rows="4" placeholder="Short description..." required></textarea>
+
+        <label>Upload Logo (Optional):</label>
+        <input type="file" id="resourceLogo" accept="image/*">
+
+        <button type="submit">Save Resource</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT -->
+  <script>
+    /* THEME TOGGLE: NIGHT (DEFAULT) -> DAY (light-mode) */
+    function toggleDayNight() {
+      document.body.classList.toggle('light-mode');
+      const themeToggle = document.getElementById('themeToggle');
+      // If we are in light-mode, show moon to go back to night
+      if (document.body.classList.contains('light-mode')) {
+        themeToggle.textContent = '🌙';
+      } else {
+        themeToggle.textContent = '☀️';
+      }
+    }
+
+    /* MOBILE MENU TOGGLE */
+    function toggleMenu() {
+      const navLinks = document.getElementById('navLinks');
+      navLinks.classList.toggle('active');
+    }
+
+    /* TYPED TEXT EFFECT */
+    const typedTextElem = document.getElementById('typedText');
+    const texts = [
+      "Master Coding with CodeHive Sensei",
+      "Learn, Code, and Innovate!",
+      "Build Your Future in Tech"
+    ];
+    let textIndex = 0;
+    let charIndex = 0;
+    let currentText = texts[textIndex];
+    let typingSpeed = 100; 
+    let erasingSpeed = 50;
+    let newTextDelay = 1500; // Delay between texts
+
+    function type() {
+      if(charIndex < currentText.length) {
+        typedTextElem.textContent += currentText.charAt(charIndex);
+        charIndex++;
+        setTimeout(type, typingSpeed);
+      } else {
+        // Text finished, wait then erase
+        setTimeout(erase, newTextDelay);
+      }
+    }
+    function erase() {
+      if(charIndex > 0) {
+        typedTextElem.textContent = currentText.substring(0, charIndex - 1);
+        charIndex--;
+        setTimeout(erase, erasingSpeed);
+      } else {
+        // Erasing done, switch to next text
+        textIndex = (textIndex + 1) % texts.length;
+        currentText = texts[textIndex];
+        setTimeout(type, typingSpeed);
+      }
+    }
+    document.addEventListener("DOMContentLoaded", () => {
+      type();
+    });
+
+    /* BASIC ADMIN LOGIN PROMPT (NOT SECURE) */
+    function adminLogin() {
+      const password = prompt("Enter Admin Password:");
+      // Change 'admin123' to whatever you want
+      if(password === "@codeHive123mgh@") {
+        // Show Admin Panel
+        document.getElementById('adminPanel').style.display = 'block';
+        alert("Welcome, Admin!");
+      } else if(password !== null) {
+        alert("Incorrect password!");
+      }
+    }
+
+    /* CREATE FLOATING BUBBLES (DEFAULT NIGHT STYLE) */
+    const bubbleContainer = document.getElementById('bubbleContainer');
+    function createBubble() {
+      const bubble = document.createElement('div');
+      bubble.classList.add('bubble');
+
+      // Random size & position
+      const size = Math.random() * 40 + 10; // bubble size
+      bubble.style.width = size + 'px';
+      bubble.style.height = size + 'px';
+      bubble.style.left = Math.random() * 100 + '%';
+
+      // Add to container
+      bubbleContainer.appendChild(bubble);
+
+      // Animate upward
+      const riseDuration = Math.random() * 3000 + 4000; // 4s to 7s
+      bubble.animate([
+        { transform: `translateY(0)`, opacity: 0.9 },
+        { transform: `translateY(-120vh)`, opacity: 0.2 }
+      ], {
+        duration: riseDuration,
+        easing: 'linear'
+      }).onfinish = () => {
+        // Remove bubble after animation
+        bubble.remove();
+      };
+    }
+
+    // Generate new bubble every 500ms
+    setInterval(createBubble, 500);
+
+    /* DYNAMIC RESOURCE SECTION CREATION */
+    const resourcesContainer = document.getElementById('resourcesContainer');
+    const resourceForm = document.getElementById('resourceForm');
+
+    resourceForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      // Get form values
+      const title = document.getElementById('resourceTitle').value;
+      const link = document.getElementById('resourceLink').value;
+      const description = document.getElementById('resourceDescription').value;
+      const logoFile = document.getElementById('resourceLogo').files[0];
+
+      // Create a new resource section
+      const resourceSection = document.createElement('div');
+      resourceSection.classList.add('section', 'resource-section');
+
+      const glassBox = document.createElement('div');
+      glassBox.classList.add('glass-box');
+
+      // Add logo if uploaded
+      if (logoFile) {
+        const logo = document.createElement('img');
+        logo.src = URL.createObjectURL(logoFile);
+        glassBox.appendChild(logo);
+      }
+
+      // Add title, description, and download button
+      glassBox.innerHTML += `
+        <h2>${title}</h2>
+        <p>${description}</p>
+        <a href="${link}" download>Download</a>
+      `;
+
+      resourceSection.appendChild(glassBox);
+      resourcesContainer.appendChild(resourceSection);
+
+      // Reset form
+      resourceForm.reset();
+      alert('Resource added successfully!');
+    });
+  </script>
+</body>
+</html>
